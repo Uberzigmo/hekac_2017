@@ -30,10 +30,12 @@ def from_html_to_json(url):
         for tr in enumerate(html_tree.xpath('//table/tbody/tr')[1:]):
             for piece in enumerate(structure):
                 if piece[0] == 1:
-                    transactions[tr[0]][piece[1]] = tr[1].xpath('td[{}]/text()')
+                    transactions[tr[0]][piece[1]] = tr[1].xpath('td[2]/@data-value')
                 else:
                     transactions[tr[0]][piece[1]] = tr[1].xpath('td[{}]/text()'.format(piece[0]+1))
 
         return json.dumps(transactions)
 
 # from_html_to_json('https://www.fio.cz/ib2/transparent?a=2600088789')
+
+print(from_html_to_json('https://www.fio.cz/ib2/transparent?a=2600088789'))
