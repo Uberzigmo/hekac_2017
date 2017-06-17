@@ -3,7 +3,7 @@ from collections import defaultdict
 import requests
 import json
 
-def from_html_to_csv(url):
+def from_html_to_json(url):
 
     requests_session = requests.session()
     page = requests_session.get(url)
@@ -28,9 +28,9 @@ def from_html_to_csv(url):
         # //table/tbody/tr/td[1]/text()
 
         for tr in enumerate(html_tree.xpath('//table/tbody/tr')[1:]):
-            transactions[tr[0]]['date'] = tr[1].xpath('td[1]/text()'))
+            for piece in enumerate(structure):
+                transactions[tr[0]][piece[1]] = tr[1].xpath('td[{}]/text()'.format(piece[0]+1))
 
+        return json.dumps(transactions)
 
-        return
-
-print(from_html_to_csv('https://www.fio.cz/ib2/transparent?a=2600088789'))
+from_html_to_json('https://www.fio.cz/ib2/transparent?a=2600088789')
