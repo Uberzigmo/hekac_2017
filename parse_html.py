@@ -2,9 +2,16 @@ from lxml import html
 from collections import defaultdict
 import requests
 import json
+import re
+import unicodedata
 
-def from_html_to_json(url):
 
+def decode_diacritics(input_message):
+    decoded_message = unicodedata.normalize('NFD', input_message[0]).encode('ascii', 'ignore')
+    return decoded_message
+
+
+def from_html_to_csv(url):
     requests_session = requests.session()
     page = requests_session.get(url)
 
@@ -27,13 +34,15 @@ def from_html_to_json(url):
 
         # //table/tbody/tr/td[1]/text()
 
+
         for tr in enumerate(html_tree.xpath('//table/tbody/tr')[1:]):
-            for piece in enumerate(structure):
-                if piece[0] == 1:
-                    transactions[tr[0]][piece[1]] = tr[1].xpath('td[{}]/text()')
-                else:
-                    transactions[tr[0]][piece[1]] = tr[1].xpath('td[{}]/text()'.format(piece[0]+1))
+            transactions[tr[0]]['date'] = tr[1].xpath('td[1]/text()')
+            transactions[tr[0]]['amount'] = re.findall('[0-9]+[,][0-9]+', tr[1].xpath('td[2]/text()')[0])
+            transactions[tr[0]]['type'] = decode_diacritics(tr[1].xpath('td[3]/text()'))
 
-        return json.dumps(transactions)
+            transactions[tr[0]]['name'] = tr[1].xpath('td[4]/text()')
 
-from_html_to_json('https://www.fio.cz/ib2/transparent?a=2600088789')
+        return transactions
+
+
+print(from_html_to_csv('https://www.fio.cz/ib2/transparent?a=2600088789'))
